@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Satellite, RefreshCw, AlertTriangle, Info, Wifi, WifiOff,
+  Satellite, RefreshCw, AlertTriangle, Info, Wifi,
   MapPin, TrendingDown, Bell, ChevronRight, X, Activity,
   Zap, Clock, BarChart2
 } from 'lucide-react';
@@ -118,10 +118,10 @@ export default function App() {
           <span>Dishboard</span>
         </div>
         <nav className="sidebar-nav">
-          <a className="nav-item active" href="#"><BarChart2 size={16} />Dashboard</a>
-          <a className="nav-item" href="#"><Activity size={16} />Signal Analysis</a>
-          <a className="nav-item" href="#"><Bell size={16} />Alerts <span className="nav-badge">{alerts.length}</span></a>
-          <a className="nav-item" href="#"><Zap size={16} />API Connect</a>
+          <a className="nav-item active" href="/"><BarChart2 size={16} />Dashboard</a>
+          <a className="nav-item" href="/signal"><Activity size={16} />Signal Analysis</a>
+          <a className="nav-item" href="/alerts"><Bell size={16} />Alerts <span className="nav-badge">{alerts.length}</span></a>
+          <a className="nav-item" href="/api"><Zap size={16} />API Connect</a>
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-status">

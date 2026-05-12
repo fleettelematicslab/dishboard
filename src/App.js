@@ -10,12 +10,78 @@ import {
 import './App.css';
 
 const INITIAL_TERMINALS = [
-  { id: 1, name: 'Construction Site A', loc: 'Hwaseong, Gyeonggi', dl: 213, ul: 18, snr: 92, uptime: 99.8, latency: 24, status: 'online',  obstruction: 2 },
-  { id: 2, name: 'Construction Site B', loc: 'Asan, Chungnam',     dl: 89,  ul: 7,  snr: 61, uptime: 94.2, latency: 48, status: 'degraded', obstruction: 18 },
-  { id: 3, name: 'Farm C-1',            loc: 'Gimje, Jeonbuk',     dl: 198, ul: 15, snr: 88, uptime: 99.1, latency: 29, status: 'online',  obstruction: 3 },
-  { id: 4, name: 'Farm C-2',            loc: 'Jeongeup, Jeonbuk',  dl: 0,   ul: 0,  snr: 0,  uptime: 97.3, latency: 0,  status: 'offline', obstruction: 31 },
-  { id: 5, name: 'Fishing Fleet A',     loc: 'Gijang, Busan',      dl: 241, ul: 21, snr: 95, uptime: 98.6, latency: 22, status: 'online',  obstruction: 1 },
-  { id: 6, name: 'Resort D',            loc: 'Yangyang, Gangwon',  dl: 176, ul: 14, snr: 83, uptime: 99.5, latency: 31, status: 'online',  obstruction: 5 },
+  {
+    id: 1,
+    name: '서해 꽃게잡이 1호',
+    loc: '연평도 인근 해상',
+    dl: 213,
+    ul: 18,
+    snr: 92,
+    uptime: 99.8,
+    latency: 24,
+    status: 'online',
+    obstruction: 2,
+  },
+  {
+    id: 2,
+    name: '부산 선망선단 A',
+    loc: '부산 기장 해상',
+    dl: 89,
+    ul: 7,
+    snr: 61,
+    uptime: 94.2,
+    latency: 48,
+    status: 'degraded',
+    obstruction: 18,
+  },
+  {
+    id: 3,
+    name: '제주 화물선 K-12',
+    loc: '제주-완도 항로',
+    dl: 198,
+    ul: 15,
+    snr: 88,
+    uptime: 99.1,
+    latency: 29,
+    status: 'online',
+    obstruction: 3,
+  },
+  {
+    id: 4,
+    name: '통영 양식장 관리선',
+    loc: '욕지도 인근',
+    dl: 0,
+    ul: 0,
+    snr: 0,
+    uptime: 97.3,
+    latency: 0,
+    status: 'offline',
+    obstruction: 31,
+  },
+  {
+    id: 5,
+    name: '목포 근해어선 B',
+    loc: '목포 서남해',
+    dl: 241,
+    ul: 21,
+    snr: 95,
+    uptime: 98.6,
+    latency: 22,
+    status: 'online',
+    obstruction: 1,
+  },
+  {
+    id: 6,
+    name: '울산 급유선 U-3',
+    loc: '울산항 외항',
+    dl: 176,
+    ul: 14,
+    snr: 83,
+    uptime: 99.5,
+    latency: 31,
+    status: 'online',
+    obstruction: 5,
+  },
 ];
 
 function makeSignalHistory(base, status) {
@@ -28,8 +94,12 @@ function makeSignalHistory(base, status) {
 }
 
 function StatusBadge({ status }) {
-  const map = { online: ['Online', 'badge-online'], degraded: ['Degraded', 'badge-degraded'], offline: ['Offline', 'badge-offline'] };
-  const [label, cls] = map[status] || ['알수없음', ''];
+  const map = {
+    online: ['정상 연결', 'badge-online'],
+    degraded: ['신호 저하', 'badge-degraded'],
+    offline: ['오프라인', 'badge-offline'],
+  };
+  const [label, cls] = map[status] || ['확인 필요', ''];
   return <span className={`badge ${cls}`}><span className="badge-dot" />{label}</span>;
 }
 
@@ -100,14 +170,18 @@ export default function App() {
     filter === 'all' ? true : filter === 'online' ? t.status === 'online' : t.status !== 'online'
   );
 
-  const onlineCount = terminals.filter(t => t.status === 'online').length;
-  const avgDl = Math.round(terminals.filter(t => t.status === 'online').reduce((a, t) => a + t.dl, 0) / onlineCount);
+  const onlineTerminals = terminals.filter(t => t.status === 'online');
+  const onlineCount = onlineTerminals.length;
+  const onlineRate = Math.round((onlineCount / terminals.length) * 100);
+  const avgDl = onlineCount
+    ? Math.round(onlineTerminals.reduce((a, t) => a + t.dl, 0) / onlineCount)
+    : 0;
   const selectedT = terminals.find(t => t.id === selected);
 
   const alerts = [
-    { id: 1, type: 'warn', text: 'Construction Site B — Signal loss detected. NE azimuth 18° blocked by obstruction.' },
-    { id: 2, type: 'warn', text: 'Farm C-2 — Downtime at 03:42 (7 min). Auto-reconnect successful.' },
-    { id: 3, type: 'info', text: 'Fishing Fleet A — Firmware update available (v3.12.1).' },
+    { id: 1, type: 'warn', text: '부산 선망선단 A — 신호 저하 감지. 주변 장애물 또는 안테나 설치 각도 확인 필요.' },
+    { id: 2, type: 'warn', text: '통영 양식장 관리선 — 03:42 연결 장애 발생. 7분 후 자동 복구됨.' },
+    { id: 3, type: 'info', text: '목포 근해어선 B — 단말 펌웨어 업데이트 가능.' },
   ].filter(a => !alertDismissed.includes(a.id));
 
   return (
@@ -118,15 +192,15 @@ export default function App() {
           <span>Dishboard</span>
         </div>
         <nav className="sidebar-nav">
-          <a className="nav-item active" href="/"><BarChart2 size={16} />Dashboard</a>
-          <a className="nav-item" href="/signal"><Activity size={16} />Signal Analysis</a>
-          <a className="nav-item" href="/alerts"><Bell size={16} />Alerts <span className="nav-badge">{alerts.length}</span></a>
-          <a className="nav-item" href="/api"><Zap size={16} />API Connect</a>
+          <a className="nav-item active" href="/"><BarChart2 size={16} />선박 관제</a>
+          <a className="nav-item" href="/signal"><Activity size={16} />신호 분석</a>
+          <a className="nav-item" href="/alerts"><Bell size={16} />장애 알림 <span className="nav-badge">{alerts.length}</span></a>
+          <a className="nav-item" href="/api"><Zap size={16} />API 연동</a>
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-status">
             <span className="online-dot" />
-            <span>Live connection</span>
+            <span>관제 서버 연결 정상</span>
           </div>
         </div>
       </aside>
@@ -134,20 +208,20 @@ export default function App() {
       <main className="main">
         <header className="topbar">
           <div>
-            <h1 className="page-title">Terminal Status</h1>
-            <p className="page-sub">Monitoring {terminals.length} terminals</p>
+            <h1 className="page-title">선박 통신 현황</h1>
+            <p className="page-sub">선박별 Starlink/위성인터넷 연결 상태, 지연시간, 장애 이력, 복구 상태를 확인합니다.</p>
           </div>
           <button className={`btn-refresh ${refreshed ? 'spin' : ''}`} onClick={refresh}>
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} /> 새로고침
           </button>
         </header>
 
         <div className="metrics">
           {[
-            { label: 'Total Terminals', value: terminals.length, sub: 'managed', icon: <Satellite size={18} /> },
-            { label: 'Online', value: onlineCount, sub: `${Math.round(onlineCount / terminals.length * 100)}% uptime`, icon: <Wifi size={18} />, accent: 'teal' },
-            { label: 'Avg Download', value: `${avgDl}`, sub: 'Mbps (online avg)', icon: <TrendingDown size={18} /> },
-            { label: "Today's Alerts", value: alerts.length, sub: 'unread', icon: <Bell size={18} />, accent: alerts.length > 0 ? 'amber' : '' },
+            { label: '관리 선박', value: terminals.length, sub: 'vessels', icon: <Satellite size={18} /> },
+            { label: '정상 연결', value: onlineCount, sub: `${onlineRate}% online`, icon: <Wifi size={18} />, accent: 'teal' },
+            { label: '평균 다운로드', value: `${avgDl}`, sub: 'Mbps / 정상 선박 평균', icon: <TrendingDown size={18} /> },
+            { label: '오늘 알림', value: alerts.length, sub: '확인 필요', icon: <Bell size={18} />, accent: alerts.length > 0 ? 'amber' : '' },
           ].map((m, i) => (
             <div key={i} className={`metric-card ${m.accent ? `accent-${m.accent}` : ''}`}>
               <div className="metric-icon">{m.icon}</div>
@@ -161,9 +235,13 @@ export default function App() {
         </div>
 
         <div className="section-header">
-          <h2 className="section-title">Terminals</h2>
+          <h2 className="section-title">선박 목록</h2>
           <div className="filter-tabs">
-            {[['all', 'All'], ['online', 'Online'], ['issue', 'Issues']].map(([k, v]) => (
+            {[
+              ['all', '전체'],
+              ['online', '정상'],
+              ['issue', '이슈'],
+            ].map(([k, v]) => (
               <button key={k} className={`filter-tab ${filter === k ? 'active' : ''}`} onClick={() => setFilter(k)}>{v}</button>
             ))}
           </div>
@@ -171,12 +249,12 @@ export default function App() {
 
         <div className="terminal-list">
           <div className="terminal-header">
-            <span>Terminal / Location</span>
-            <span>Download</span>
-            <span>Signal</span>
-            <span>Uptime</span>
-            <span>Latency</span>
-            <span>Status</span>
+            <span>선박 / 운항 위치</span>
+            <span>다운로드</span>
+            <span>신호 품질</span>
+            <span>가동률</span>
+            <span>지연시간</span>
+            <span>상태</span>
           </div>
           {filtered.map(t => (
             <div key={t.id} className={`terminal-row ${selected === t.id ? 'selected' : ''}`}
@@ -195,11 +273,11 @@ export default function App() {
               </div>
               <div>
                 <div className="t-val mono">{t.uptime}%</div>
-                <div className="t-sub">30d</div>
+                <div className="t-sub">30일</div>
               </div>
               <div>
                 <div className="t-val mono">{t.status === 'offline' ? '—' : `${t.latency}ms`}</div>
-                <div className="t-sub">{t.latency < 35 ? 'Good' : t.latency < 60 ? 'Fair' : t.status === 'offline' ? '' : 'Slow'}</div>
+                <div className="t-sub">{t.latency < 35 ? '양호' : t.latency < 60 ? '주의' : t.status === 'offline' ? '' : '느림'}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <StatusBadge status={t.status} />
@@ -219,18 +297,18 @@ export default function App() {
             </div>
             <div className="detail-grid">
               <div className="detail-card">
-                <div className="detail-card-title">Obstruction Map</div>
+                <div className="detail-card-title">장애물 / 설치 시야</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                   <ObstructionRing pct={selectedT.obstruction} />
                   <div>
-                    <div className="obs-stat"><span>Blocked</span><span className="mono" style={{ color: '#ef4444' }}>{selectedT.obstruction}%</span></div>
-                    <div className="obs-stat"><span>Clear</span><span className="mono" style={{ color: '#22d3a0' }}>{100 - selectedT.obstruction}%</span></div>
-                    <div className="obs-stat"><span>Recommended</span><span className="mono">±20° vertical</span></div>
+                    <div className="obs-stat"><span>차단 추정</span><span className="mono" style={{ color: '#ef4444' }}>{selectedT.obstruction}%</span></div>
+                    <div className="obs-stat"><span>개방 시야</span><span className="mono" style={{ color: '#22d3a0' }}>{100 - selectedT.obstruction}%</span></div>
+                    <div className="obs-stat"><span>점검 권장</span><span className="mono">상공 시야 확보</span></div>
                   </div>
                 </div>
               </div>
               <div className="detail-card">
-                <div className="detail-card-title">Signal Quality — 24h</div>
+                <div className="detail-card-title">신호 품질 — 24시간</div>
                 <ResponsiveContainer width="100%" height={130}>
                   <LineChart data={histories[selectedT.id] || []}>
                     <XAxis dataKey="h" tick={{ fontSize: 10, fill: '#475569' }} tickLine={false} axisLine={false} interval={5} />
@@ -242,12 +320,12 @@ export default function App() {
                 </ResponsiveContainer>
               </div>
               <div className="detail-card">
-                <div className="detail-card-title">Live Metrics</div>
+                <div className="detail-card-title">실시간 통신 지표</div>
                 {[
-                  ['Download', selectedT.dl ? `${selectedT.dl} Mbps` : 'Offline', <Activity size={14} />],
-                  ['Upload', selectedT.ul ? `${selectedT.ul} Mbps` : 'Offline', <TrendingDown size={14} />],
-                  ['Latency', selectedT.latency ? `${selectedT.latency} ms` : 'Offline', <Clock size={14} />],
-                  ['30d Uptime', `${selectedT.uptime}%`, <Zap size={14} />],
+                  ['다운로드', selectedT.dl ? `${selectedT.dl} Mbps` : '오프라인', <Activity size={14} />],
+                  ['업로드', selectedT.ul ? `${selectedT.ul} Mbps` : '오프라인', <TrendingDown size={14} />],
+                  ['지연시간', selectedT.latency ? `${selectedT.latency} ms` : '오프라인', <Clock size={14} />],
+                  ['30일 가동률', `${selectedT.uptime}%`, <Zap size={14} />],
                 ].map(([label, val, icon]) => (
                   <div key={label} className="live-row">
                     <span className="live-label">{icon}{label}</span>
@@ -261,7 +339,7 @@ export default function App() {
 
         {alerts.length > 0 && (
           <div className="alerts-section">
-            <h2 className="section-title" style={{ marginBottom: '0.75rem' }}>Alerts</h2>
+            <h2 className="section-title" style={{ marginBottom: '0.75rem' }}>장애 / 운영 알림</h2>
             {alerts.map(a => (
               <div key={a.id} className={`alert-item alert-${a.type}`}>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
